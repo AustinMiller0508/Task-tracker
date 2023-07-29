@@ -22,6 +22,39 @@ class Task:
         self.name = ""
         self.description = ""
         
+def savedTaskInit():
+    name = ""
+    description = ""
+    date = ""
+    try:
+        with open("taskTrackerSave.csv") as taskFile: #open save file to reinitialize each task at startup
+            for line in taskFile:
+                i = 0
+                commacount = 0
+                while (i < len(line)):
+                    if (line[i] == ','): #increment the current position being read
+                        commacount += 1
+                    elif (commacount == 0): # get task name from file
+                        name += line[i]
+                    elif (commacount == 1): # get description from file
+                        descrtiption += line[i]
+                    elif (commacount == 2): #get due date from file
+                        date += line[i]
+                    i += 1
+                initTask(date,name,description) #pass read data from file to init function
+
+
+def initTask(date,name,description):
+    
+    curTask = Task()                                #create new task and add to list of tasks
+    tasks.append(curTask)
+    curTask.name = name                             #Set task values based on file data
+    curTask.description = description
+    curTask.dueDate = date
+    
+    return
+                
+
 def mainMenu():
     programExit = False
     
@@ -60,7 +93,8 @@ def createTask():
     return
 
 def main():
-    
+
+    savedTasksInit()
     mainMenu()
 
     return 0
