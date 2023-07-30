@@ -27,7 +27,7 @@ def savedTaskInit():
     description = ""
     date = ""
     try:
-        with open("taskTrackerSave.csv") as taskFile: #open save file to reinitialize each task at startup
+        with open("tasks.csv") as taskFile: #open save file to reinitialize each task at startup
             for line in taskFile:
                 i = 0
                 commacount = 0
@@ -42,6 +42,24 @@ def savedTaskInit():
                         date += line[i]
                     i += 1
                 initTask(date,name,description) #pass read data from file to init function
+
+
+def saveTask(task,pos):
+    tasksOverwrite = ""
+    with open("tasks.csv") as taskFile:
+        i = 0
+        for line in taskFile:
+            if(i != pos):
+                tasksOverwrite += line
+            else:
+                tasksOverwrite += task.name + "," + task.description + "," + task.status + "," + task.dueDate + "\n"
+            i += 1
+    taskFile.close()
+    f = open("tasks.csv", "w")
+    f.write(tasksOverwrite)
+    f.close()
+    return
+                
 
 
 def initTask(date,name,description):
