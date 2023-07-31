@@ -43,20 +43,39 @@ def savedTaskInit():
                     i += 1
                 initTask(date,name,description) #pass read data from file to init function
 
+def removeFromSave(pos):
+    tasksOverwrite = ""
+    with open("tasks.csv") as taskFile:
+        i = 0
+        for line in taskFile:
+            if(i != pos): #rewrite all lines except the position specified
+                tasksOverwrite += line
+            i += 1
+    taskFile.close()
+    f = open("tasks.csv", "w") #write over save file with new data
+    f.write(tasksOverwrite)
+    f.close()
+    return
 
 def saveTask(task,pos):
     tasksOverwrite = ""
     with open("tasks.csv") as taskFile:
         i = 0
         for line in taskFile:
-            if(i != pos):
+            if(i != pos): #rewrite all lines except the position specified
                 tasksOverwrite += line
             else:
                 tasksOverwrite += task.name + "," + task.description + "," + task.status + "," + task.dueDate + "\n"
             i += 1
     taskFile.close()
-    f = open("tasks.csv", "w")
+    f = open("tasks.csv", "w") #write over save file with new data
     f.write(tasksOverwrite)
+    f.close()
+    return
+
+def saveTask(task): #override function for saving newly added tasks
+    f = open("tasks.csv", "a") #append new task to end of file
+    f.write(task.name + "," + task.description + "," + task.status + "," + task.dueDate + "\n")
     f.close()
     return
                 
