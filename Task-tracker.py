@@ -129,6 +129,25 @@ def createTask():
     print("\nTask created successfully!\n")
     return
 
+def displayTask(task):
+    print("------------------------\n" + task.name + "\nDue on: " + task.duedate + "\nStatus: " + task.status + "\n\n" + task.description + "\n")
+    return
+
+def search(query):
+    for item in tasks:
+        i = 0
+        try:
+            while (i < len(item.name)): #if name contains search query display it
+                if(item.name[i:i+len(query)]):
+                    displayTask(item)
+                i += 1
+            i = 0
+            while (i < len(item.description)): #if description contains search query display it
+                if(item.description[i:i+len(query)]):
+                    displayTask(item)
+                i += 1
+    
+
 def main():
 
     savedTasksInit()
