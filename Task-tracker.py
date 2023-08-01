@@ -96,11 +96,13 @@ def mainMenu():
     programExit = False
     
     while(programExit == False):
-        print("          Menu          \n------------------------\n1)    Today at a glance\n2)    Week at a glance\n3)    New task\n4)    Update task\n5)    View tasks\n6)    Last 10 Accomplishments\n7)    Quit\n-----------------------\n\nPlease select the desired action:")
+        print("          Menu          \n------------------------\n1)    Today at a glance\n2)    Week at a glance\n3)    New task\n4)    Search tasks\n5)    Update task\n6)    View tasks\n7)    Last 10 Accomplishments\n8)    Quit\n-----------------------\n\nPlease select the desired action:")
         selected = input()
         if(selected == "3"):                        #if menu option 3 is chosen run the create task function
             createTask()
-        if(selected == "7"):
+        elif(selected == "4"):
+            
+        elif(selected == "7"):
             print("See you again soon!")
             programExit = True
 
@@ -133,19 +135,33 @@ def displayTask(task):
     print("------------------------\n" + task.name + "\nDue on: " + task.duedate + "\nStatus: " + task.status + "\n\n" + task.description + "\n")
     return
 
-def search(query):
+def search():
+    returnToMenu = False
+    while (returnToMenu == False):
+        print("\nWhat would you like to search for?(\"/q to return to menu\")\n")
+        query = input()
+        if(query == "/q"):
+            returnToMenu = True
+        exactSearch(query)
+            
+    return
+    
+
+def exactSearch(query):
+    query = query.lower()
     for item in tasks:
         i = 0
         try:
             while (i < len(item.name)): #if name contains search query display it
-                if(item.name[i:i+len(query)]):
+                if(item.name[i:i+len(query)].lower() == query):
                     displayTask(item)
                 i += 1
             i = 0
             while (i < len(item.description)): #if description contains search query display it
-                if(item.description[i:i+len(query)]):
+                if(item.description[i:i+len(query)].lower() == query):
                     displayTask(item)
                 i += 1
+    return
     
 
 def main():
