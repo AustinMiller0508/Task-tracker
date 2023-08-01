@@ -22,7 +22,7 @@ class Task:
         self.name = ""
         self.description = ""
         
-def savedTaskInit():
+def savedTasksInit():
     name = ""
     description = ""
     date = ""
@@ -42,6 +42,8 @@ def savedTaskInit():
                         date += line[i]
                     i += 1
                 initTask(date,name,description) #pass read data from file to init function
+    except:
+        print("Error opening save file (code:1)\n")
 
 def removeFromSave(pos):
     tasksOverwrite = ""
@@ -101,8 +103,10 @@ def mainMenu():
         if(selected == "3"):                        #if menu option 3 is chosen run the create task function
             createTask()
         elif(selected == "4"):
-            
-        elif(selected == "7"):
+            search()
+        elif(selected == "8"):
+            for task in tasks:
+                saveTask(task)
             print("See you again soon!")
             programExit = True
 
@@ -153,14 +157,16 @@ def exactSearch(query):
         i = 0
         try:
             while (i < len(item.name)): #if name contains search query display it
-                if(item.name[i:i+len(query)].lower() == query):
+                if(item.name[i:i+len(query)-1].lower() == query):
                     displayTask(item)
                 i += 1
             i = 0
             while (i < len(item.description)): #if description contains search query display it
-                if(item.description[i:i+len(query)].lower() == query):
+                if(item.description[i:i+len(query)-1].lower() == query):
                     displayTask(item)
                 i += 1
+        except:
+            i = i
     return
     
 
