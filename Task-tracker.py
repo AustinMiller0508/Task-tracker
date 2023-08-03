@@ -23,12 +23,12 @@ class Task:
         self.description = ""
         
 def savedTasksInit():
-    name = ""
-    description = ""
-    date = ""
     try:
         with open("tasks.csv") as taskFile: #open save file to reinitialize each task at startup
             for line in taskFile:
+                name = ""
+                description = ""
+                date = ""
                 i = 0
                 commacount = 0
                 while (i < len(line)):
@@ -37,11 +37,13 @@ def savedTasksInit():
                     elif (commacount == 0): # get task name from file
                         name += line[i]
                     elif (commacount == 1): # get description from file
-                        descrtiption += line[i]
-                    elif (commacount == 2): #get due date from file
+                        description += line[i]
+                    elif (commacount == 2):
+                        status += line[i]
+                    elif (commacount == 3): #get due date from file
                         date += line[i]
                     i += 1
-                initTask(date,name,description) #pass read data from file to init function
+                initTask(date,name,status,description) #pass read data from file to init function
     except:
         print("Error opening save file (code:1)\n")
 
@@ -67,7 +69,7 @@ def saveTask(task,pos):
             if(i != pos): #rewrite all lines except the position specified
                 tasksOverwrite += line
             else:
-                tasksOverwrite += task.name + "," + task.description + "," + task.status + "," + task.dueDate + "\n"
+                tasksOverwrite += task.name + "," + task.description + "," + task.status + "," + str(task.dueDate) + "\n"
             i += 1
     taskFile.close()
     f = open("tasks.csv", "w") #write over save file with new data
@@ -83,13 +85,14 @@ def saveTask(task): #override function for saving newly added tasks
                 
 
 
-def initTask(date,name,description):
+def initTask(date,name,status,description):
     
     curTask = Task()                                #create new task and add to list of tasks
-    tasks.append(curTask)
     curTask.name = name                             #Set task values based on file data
     curTask.description = description
     curTask.dueDate = date
+    curTask.status = status
+    tasks.append(curTask)
     
     return
                 
@@ -135,8 +138,8 @@ def createTask():
     print("\nTask created successfully!\n")
     return
 
-def displayTask(task):
-    print("------------------------\n" + task.name + "\nDue on: " + task.duedate + "\nStatus: " + task.status + "\n\n" + task.description + "\n")
+def displayTask(item):
+    print("------------------------\n" + item.name + "\nDue on: " +  str(item.dueDate) + "\nStatus: " + item.status + "\n\n" + item.description + "\n")
     return
 
 def search():
@@ -157,12 +160,12 @@ def exactSearch(query):
         i = 0
         try:
             while (i < len(item.name)): #if name contains search query display it
-                if(item.name[i:i+len(query)-1].lower() == query):
+                if(item.name[i:i+len(query)].lower() == query):
                     displayTask(item)
                 i += 1
             i = 0
             while (i < len(item.description)): #if description contains search query display it
-                if(item.description[i:i+len(query)-1].lower() == query):
+                if(item.description[i:i+len(query)].lower() == query):
                     displayTask(item)
                 i += 1
         except:
