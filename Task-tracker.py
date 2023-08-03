@@ -77,7 +77,7 @@ def saveTask(task,pos):
 
 def saveTask(task): #override function for saving newly added tasks
     f = open("tasks.csv", "a") #append new task to end of file
-    f.write(task.name + "," + task.description + "," + task.status + "," + task.dueDate + "\n")
+    f.write(task.name + "," + task.description + "," + task.status + "," + str(task.dueDate) + "\n")
     f.close()
     return
                 
