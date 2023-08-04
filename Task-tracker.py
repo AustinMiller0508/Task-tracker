@@ -11,7 +11,6 @@
 #   Drop
 
 import time
-noVariations = ["no","none","n/a","nah","nope"]
 tasks = []
 
 
@@ -29,16 +28,22 @@ def savedTasksInit():
                 name = ""
                 description = ""
                 date = ""
+                status = ""
                 i = 0
                 commacount = 0
+                parenOpen = False
                 while (i < len(line)):
-                    if (line[i] == ','): #increment the current position being read
+                    if (line[i] == '('):
+                        parenOpen = True
+                    elif (line[i] == ')'):
+                        parenOpen = False
+                    if (line[i] == ',' and parenOpen == False): #increment the current position being read
                         commacount += 1
                     elif (commacount == 0): # get task name from file
                         name += line[i]
                     elif (commacount == 1): # get description from file
                         description += line[i]
-                    elif (commacount == 2):
+                    elif (commacount == 2): # get status from file
                         status += line[i]
                     elif (commacount == 3): #get due date from file
                         date += line[i]
@@ -107,21 +112,18 @@ def mainMenu():
             createTask()
         elif(selected == "4"):
             search()
+        elif(selected == "5"):
+            updateTask()
         elif(selected == "8"):
             for task in tasks:
                 saveTask(task)
             print("See you again soon!")
             programExit = True
 
-def createTask():
+
+
+def setDate(task):
     validDate = False
-    
-    curTask = Task()                                #create new task and add to list of tasks
-    tasks.append(curTask)
-    print("\nWhat would you like this task to be named?\n")
-    name = input()                                  #gather task name
-    print("\nPlease add a description for the task.\n")
-    description = input()                           #gather task description
     print("\nWhen is this task due? Please use the mm/dd/yyyy format")
     while (validDate == False):
         date = input()
@@ -131,21 +133,92 @@ def createTask():
         except:
             print("\nThe date you entered is invalid, please try again...\n")
 
-    curTask.name = name                             #Set task values based on user input
-    curTask.description = description
-    curTask.dueDate = realDate
+    task.dueDate = realDate
+
+def setDescription(task):
+    print("\nPlease add a description for the task.\n")
+    description = input()                           #gather task description
+    task.description = description
+
+def setName(task):
+    print("\nWhat would you like this task to be named?\n") #gather task name
+    name = input()
+    task.name = name
+
+def setStatus(task):
+    print("\nWhat is the status of this task?\n") #gather task status (will standardize this later with selection banks)
+    status = input()
+    task.status = status
+
+
+
+def createTask():
+    
+    curTask = Task()                                #create new task and add to list of tasks
+    tasks.append(curTask)
+
+    setName(curTask)
+    setDescription(curTask)
+    setDate(curTask)
+
 
     print("\nTask created successfully!\n")
     return
 
-def displayTask(item):
-    print("------------------------\n" + item.name + "\nDue on: " +  str(item.dueDate) + "\nStatus: " + item.status + "\n\n" + item.description + "\n")
+def displayTask(item,index):
+    print("------------" + str(index) + "------------\n" + item.name + "\nDue on: " +  str(item.dueDate) + "\nStatus: " + item.status + "\n\n" + item.description + "\n-------------------------\n")
     return
+
+def updateTask():
+    
+    exitFunc = False
+    while(exitFunc == False): #until the user decides to leave continue
+        
+        validInput = False
+        while(validInput == False): #determine if the user needs to search for the task to find its index
+            print("\nDo you need to search for the task's index? (y/n)\n")
+            userIn = input()
+            if(userIn.lower() == "y"):
+                search() #if indicated initiate search function
+                validInput = True
+            elif(userIn.lower() != "n"):
+                print("Invalid entry, please try again.")
+            else:
+                validInput = True
+                
+        validInput = False
+        while(validInput == False): #confirm the user inputed a valid integer to update
+            print("\nPlease enter the index of the task you would like to update.\n")
+            userIn = input()
+            try:
+                index = int(userIn)
+                validInput = True
+            except:
+                print("Invalid entry, please try again.")
+
+        validInput = False
+        while(validInput == False): #determine what the user would like to update
+            print("\nWhat would you like to update?\n1)   Name\n2)   Description\n3)   Status\n4)   Due Date\n5)   exit to menu\n")
+            select = input()
+            if(select == '1'):
+                setName(tasks[index])
+            elif(select == '2'):
+                setDescription(tasks[index])
+            elif(select == '3'):
+                setStatus(tasks[index])
+            elif(select == '4'):
+                setDate(tasks[index])
+            elif(select == '5'):
+                validInput = True
+            else:
+                print("Invalid entry, please try again.")
+        return
+            
 
 def search():
     returnToMenu = False
     while (returnToMenu == False):
-        print("\nWhat would you like to search for?(\"/q to return to menu\")\n")
+        print("\nWhat would you like to search for?(\"/q to return\")\n")
         query = input()
         if(query == "/q"):
             returnToMenu = True
@@ -156,20 +229,25 @@ def search():
 
 def exactSearch(query):
     query = query.lower()
+    index = 0
     for item in tasks:
+        found = False
         i = 0
         try:
             while (i < len(item.name)): #if name contains search query display it
                 if(item.name[i:i+len(query)].lower() == query):
-                    displayTask(item)
+                    found = True
                 i += 1
             i = 0
             while (i < len(item.description)): #if description contains search query display it
                 if(item.description[i:i+len(query)].lower() == query):
-                    displayTask(item)
+                    found = True
                 i += 1
+            if(found):
+                displayTask(item, index)
         except:
             i = i
+        index += 1
     return
     
 
