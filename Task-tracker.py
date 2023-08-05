@@ -14,12 +14,47 @@ import time
 tasks = []
 
 
+#----------------------------Task-Funcs--------------------------------#
+
 class Task:
     def __init__(self):
         self.dueDate = time.time()
         self.status = "To Do"
         self.name = ""
         self.description = ""
+
+def setDescription(task):
+    print("\nPlease add a description for the task.\n")
+    description = input()                           #gather task description
+    task.description = description
+
+def setName(task):
+    print("\nWhat would you like this task to be named?\n") #gather task name
+    name = input()
+    task.name = name
+
+def setStatus(task):
+    print("\nWhat is the status of this task?\n") #gather task status (will standardize this later with selection banks)
+    status = input()
+    task.status = status
+
+def setDate(task):
+    validDate = False
+    print("\nWhen is this task due? Please use the mm/dd/yyyy format")
+    while (validDate == False):
+        date = input()
+        try:
+            realDate = time.strptime(date, "%m/%d/%Y")  #convert user input to time for later comparison
+            validDate = True
+        except:
+            print("\nThe date you entered is invalid, please try again...\n")
+
+    task.dueDate = realDate
+
+#----------------------------------------------------------------------#
+    
+
+#----------------------------Save-Funcs--------------------------------#
         
 def savedTasksInit():
     try:
@@ -51,6 +86,17 @@ def savedTasksInit():
                 initTask(date,name,status,description) #pass read data from file to init function
     except:
         print("Error opening save file (code:1)\n")
+
+def initTask(date,name,status,description):
+    
+    curTask = Task()                                #create new task and add to list of tasks
+    curTask.name = name                             #Set task values based on file data
+    curTask.description = description
+    curTask.dueDate = date
+    curTask.status = status
+    tasks.append(curTask)
+    
+    return
 
 def removeFromSave(pos):
     tasksOverwrite = ""
@@ -87,20 +133,50 @@ def saveTask(task): #override function for saving newly added tasks
     f.write(task.name + "," + task.description + "," + task.status + "," + str(task.dueDate) + "\n")
     f.close()
     return
+
+#----------------------------------------------------------------------#
+
                 
+#----------------------------Search-Funcs------------------------------#
 
-
-def initTask(date,name,status,description):
-    
-    curTask = Task()                                #create new task and add to list of tasks
-    curTask.name = name                             #Set task values based on file data
-    curTask.description = description
-    curTask.dueDate = date
-    curTask.status = status
-    tasks.append(curTask)
-    
+def search():
+    returnToMenu = False
+    while (returnToMenu == False):
+        print("\nWhat would you like to search for?(\"/q to return\")\n")
+        query = input()
+        if(query == "/q"):
+            returnToMenu = True
+        exactSearch(query)
+            
     return
-                
+    
+
+def exactSearch(query):
+    query = query.lower()
+    index = 0
+    for item in tasks:
+        found = False
+        i = 0
+        try:
+            while (i < len(item.name)): #if name contains search query display it
+                if(item.name[i:i+len(query)].lower() == query):
+                    found = True
+                i += 1
+            i = 0
+            while (i < len(item.description)): #if description contains search query display it
+                if(item.description[i:i+len(query)].lower() == query):
+                    found = True
+                i += 1
+            if(found):
+                displayTask(item, index)
+        except:
+            i = i
+        index += 1
+    return
+
+#----------------------------------------------------------------------#
+
+#----------------------------Menu-Funcs--------------------------------#
 
 def mainMenu():
     programExit = False
@@ -119,38 +195,6 @@ def mainMenu():
                 saveTask(task)
             print("See you again soon!")
             programExit = True
-
-
-
-def setDate(task):
-    validDate = False
-    print("\nWhen is this task due? Please use the mm/dd/yyyy format")
-    while (validDate == False):
-        date = input()
-        try:
-            realDate = time.strptime(date, "%m/%d/%Y")  #convert user input to time for later comparison
-            validDate = True
-        except:
-            print("\nThe date you entered is invalid, please try again...\n")
-
-    task.dueDate = realDate
-
-def setDescription(task):
-    print("\nPlease add a description for the task.\n")
-    description = input()                           #gather task description
-    task.description = description
-
-def setName(task):
-    print("\nWhat would you like this task to be named?\n") #gather task name
-    name = input()
-    task.name = name
-
-def setStatus(task):
-    print("\nWhat is the status of this task?\n") #gather task status (will standardize this later with selection banks)
-    status = input()
-    task.status = status
-
-
 
 def createTask():
     
@@ -213,48 +257,14 @@ def updateTask():
             else:
                 print("Invalid entry, please try again.")
         return
-            
 
-def search():
-    returnToMenu = False
-    while (returnToMenu == False):
-        print("\nWhat would you like to search for?(\"/q to return\")\n")
-        query = input()
-        if(query == "/q"):
-            returnToMenu = True
-        exactSearch(query)
-            
-    return
-    
+#----------------------------------------------------------------------#
 
-def exactSearch(query):
-    query = query.lower()
-    index = 0
-    for item in tasks:
-        found = False
-        i = 0
-        try:
-            while (i < len(item.name)): #if name contains search query display it
-                if(item.name[i:i+len(query)].lower() == query):
-                    found = True
-                i += 1
-            i = 0
-            while (i < len(item.description)): #if description contains search query display it
-                if(item.description[i:i+len(query)].lower() == query):
-                    found = True
-                i += 1
-            if(found):
-                displayTask(item, index)
-        except:
-            i = i
-        index += 1
-    return
-    
 
 def main():
 
-    savedTasksInit()
-    mainMenu()
+    savedTasksInit() #initialize array of tasks from save file
+    mainMenu() #initialize main menu
 
     return 0
 
