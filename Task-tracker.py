@@ -11,6 +11,7 @@
 #   Drop
 
 import time
+import os
 tasks = []
 
 
@@ -18,7 +19,7 @@ tasks = []
 
 class Task:
     def __init__(self):
-        self.dueDate = time.time()
+        self.dueDate = ""
         self.status = "To Do"
         self.name = ""
         self.description = ""
@@ -49,7 +50,7 @@ def setDate(task):
         except:
             print("\nThe date you entered is invalid, please try again...\n")
 
-    task.dueDate = realDate
+    task.dueDate = str(realDate)
 
 #----------------------------------------------------------------------#
     
@@ -67,25 +68,36 @@ def savedTasksInit():
                 i = 0
                 commacount = 0
                 parenOpen = False
-                while (i < len(line)):
-                    if (line[i] == '('):
-                        parenOpen = True
-                    elif (line[i] == ')'):
-                        parenOpen = False
-                    if (line[i] == ',' and parenOpen == False): #increment the current position being read
-                        commacount += 1
-                    elif (commacount == 0): # get task name from file
-                        name += line[i]
-                    elif (commacount == 1): # get description from file
-                        description += line[i]
-                    elif (commacount == 2): # get status from file
-                        status += line[i]
-                    elif (commacount == 3): #get due date from file
-                        date += line[i]
-                    i += 1
-                initTask(date,name,status,description) #pass read data from file to init function
+                if (line[i] != "\n"):
+                    while (i < len(line)):
+                        if (line[i] == '('):
+                            parenOpen = True
+                        elif (line[i] == ')'):
+                            parenOpen = False
+                        if (line[i] == ',' and parenOpen == False): #increment the current position being read
+                            commacount += 1
+                        elif (commacount == 0): # get task name from file
+                            name += line[i]
+                        elif (commacount == 1): # get description from file
+                            description += line[i]
+                        elif (commacount == 2): # get status from file
+                            status += line[i]
+                        elif (commacount == 3): #get due date from file
+                            date += line[i]
+                        i += 1
+                    initTask(date,name,status,description) #pass read data from file to init function
+            lines = taskFile.readlines()
+            last = lines[-1]
+            if(last != ""):
+                f = open("tasks.csv", "a")
+                f.write("\n")
+                f.close()
+        taskFile.close()
+            
     except:
         print("Error opening save file (code:1)\n")
+
+
 
 def initTask(date,name,status,description):
     
@@ -120,7 +132,7 @@ def saveTask(task,pos):
             if(i != pos): #rewrite all lines except the position specified
                 tasksOverwrite += line
             else:
-                tasksOverwrite += task.name + "," + task.description + "," + task.status + "," + str(task.dueDate) + "\n"
+                tasksOverwrite += task.name + "," + task.description + "," + task.status + "," + str(task.dueDate)
             i += 1
     taskFile.close()
     f = open("tasks.csv", "w") #write over save file with new data
@@ -133,6 +145,14 @@ def saveTask(task): #override function for saving newly added tasks
     f.write(task.name + "," + task.description + "," + task.status + "," + str(task.dueDate) + "\n")
     f.close()
     return
+
+def saveClose(): 
+    f = open("tasks.csv", "a") 
+    for task in tasks:
+        f.write(task.name + "," + task.description + "," + task.status + "," + str(task.dueDate))
+    f.close()
+    return
+
 
 #----------------------------------------------------------------------#
 
@@ -184,15 +204,21 @@ def mainMenu():
     while(programExit == False):
         print("          Menu          \n------------------------\n1)    Today at a glance\n2)    Week at a glance\n3)    New task\n4)    Search tasks\n5)    Update task\n6)    View tasks\n7)    Last 10 Accomplishments\n8)    Quit\n-----------------------\n\nPlease select the desired action:")
         selected = input()
-        if(selected == "3"):                        #if menu option 3 is chosen run the create task function
+        if(selected == "1"):
+            todayAtGlance()
+        elif(selected == "3"):                        #if menu option 3 is chosen run the create task function
             createTask()
         elif(selected == "4"):
             search()
         elif(selected == "5"):
             updateTask()
         elif(selected == "8"):
-            for task in tasks:
-                saveTask(task)
+            try:
+                os.remove("tasks.csv")
+            except:
+                pass
+            print(str(len(tasks)))
+            saveClose()
             print("See you again soon!")
             programExit = True
 
@@ -204,13 +230,14 @@ def createTask():
     setName(curTask)
     setDescription(curTask)
     setDate(curTask)
+    saveTask(curTask)
 
 
     print("\nTask created successfully!\n")
     return
 
 def displayTask(item,index):
-    print("------------" + str(index) + "------------\n" + item.name + "\nDue on: " +  str(item.dueDate) + "\nStatus: " + item.status + "\n\n" + item.description + "\n-------------------------\n")
+    print("\n------------" + str(index) + "------------\n" + item.name + "\nDue on: " +  str(item.dueDate) + "\nStatus: " + item.status + "\n\n" + item.description + "\n-------------------------\n")
     return
 
 def updateTask():
@@ -257,6 +284,71 @@ def updateTask():
             else:
                 print("Invalid entry, please try again.")
         return
+
+def todayAtGlance(): #display all tasks due today
+    structTime = str(time.localtime())
+    i = 17 #offset to speed up checks
+    commaCount = 0
+    today = ""
+    while (i < len(structTime)):
+        if (commaCount == 0 and structTime[i:i+7] == "tm_year"):
+            i += 8
+            while (structTime[i] != ","): #when in region for year note value for later comparison
+                today += structTime[i]
+                i += 1
+            today += "/"
+            commaCount += 1
+        elif (commaCount == 1 and structTime[i:i+6] == "tm_mon"):
+            i += 7
+            while (structTime[i] != ","): #when in region for year note value for later comparison
+                today += structTime[i]
+                i += 1
+            today += "/"
+            commaCount += 1
+        elif (commaCount == 2 and structTime[i:i+7] == "tm_mday"):
+            i += 8
+            while (structTime[i] != ","): #when in region for year note value for later comparison
+                today += structTime[i]
+                i += 1
+            commaCount += 1
+        elif (commaCount == 3):
+            i = len(structTime)
+        i += 1
+
+    index = 0
+    for task in tasks:
+        taskDay = ""
+        commaCount = 0
+        structTime = str(task.dueDate)
+        i = 17
+        while (i < len(structTime)):
+            if (commaCount == 0 and structTime[i:i+7] == "tm_year"):
+                i += 8
+                while (structTime[i] != ","): #when in region for year note value for later comparison
+                    taskDay += structTime[i]
+                    i += 1
+                taskDay += "/"
+                commaCount += 1
+            elif (commaCount == 1 and structTime[i:i+6] == "tm_mon"):
+                i += 7
+                while (structTime[i] != ","): #when in region for year note value for later comparison
+                    taskDay += structTime[i]
+                    i += 1
+                taskDay += "/"
+                commaCount += 1
+            elif (commaCount == 2 and structTime[i:i+7] == "tm_mday"):
+                i += 8
+                while (structTime[i] != ","): #when in region for year note value for later comparison
+                    taskDay += structTime[i]
+                    i += 1
+                commaCount += 1
+            elif (commaCount == 3):
+                i = len(structTime)
+            i += 1
+        if(taskDay == today):
+            displayTask(task,index)
+        index += 1
+        
 
 #----------------------------------------------------------------------#
 
