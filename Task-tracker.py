@@ -124,7 +124,7 @@ def removeFromSave(pos):
     f.close()
     return
 
-def saveTask(task,pos):
+def saveTaskPos(task,pos):
     tasksOverwrite = ""
     with open("tasks.csv") as taskFile:
         i = 0
@@ -143,13 +143,6 @@ def saveTask(task,pos):
 def saveTask(task): #override function for saving newly added tasks
     f = open("tasks.csv", "a") #append new task to end of file
     f.write(task.name + "," + task.description + "," + task.status + "," + str(task.dueDate) + "\n")
-    f.close()
-    return
-
-def saveClose(): 
-    f = open("tasks.csv", "a") 
-    for task in tasks:
-        f.write(task.name + "," + task.description + "," + task.status + "," + str(task.dueDate))
     f.close()
     return
 
@@ -213,12 +206,6 @@ def mainMenu():
         elif(selected == "5"):
             updateTask()
         elif(selected == "8"):
-            try:
-                os.remove("tasks.csv")
-            except:
-                pass
-            print(str(len(tasks)))
-            saveClose()
             print("See you again soon!")
             programExit = True
 
@@ -273,12 +260,16 @@ def updateTask():
             select = input()
             if(select == '1'):
                 setName(tasks[index])
+                saveTaskPos(tasks[index],int(index))
             elif(select == '2'):
                 setDescription(tasks[index])
+                saveTaskPos(tasks[index],int(index))
             elif(select == '3'):
                 setStatus(tasks[index])
+                saveTaskPos(tasks[index],int(index))
             elif(select == '4'):
                 setDate(tasks[index])
+                saveTaskPos(tasks[index],int(index))
             elif(select == '5'):
                 validInput = True
             else:
