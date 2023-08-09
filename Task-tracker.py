@@ -119,21 +119,6 @@ def removeFromSave(pos):
     f.close()
     return
 
-def saveTaskPos(task,pos):
-    tasksOverwrite = ""
-    with open("tasks.csv") as taskFile:
-        i = 0
-        for line in taskFile:
-            if(i != pos): #rewrite all lines except the position specified
-                tasksOverwrite += line
-            else:
-                tasksOverwrite += task.name + "," + task.description + "," + task.status + "," + str(task.dueDate)
-            i += 1
-    taskFile.close()
-    f = open("tasks.csv", "w") #write over save file with new data
-    f.write(tasksOverwrite)
-    f.close()
-    return
 
 def saveTask(task): #override function for saving newly added tasks
     f = open("tasks.csv", "a") #append new task to end of file
@@ -191,7 +176,7 @@ def mainMenu():
     programExit = False
     
     while(programExit == False):
-        print("          Menu          \n------------------------\n1)    Today at a glance\n2)    Week at a glance\n3)    New task\n4)    Search tasks\n5)    Update task\n6)    View tasks\n7)    Last 10 Accomplishments\n8)    Quit\n-----------------------\n\nPlease select the desired action:")
+        print("          Menu          \n------------------------\n1)    Today at a glance\n2)    Week at a glance\n3)    New task\n4)    Search tasks\n5)    Update task\n6)    View tasks\n7)    Last 10 Accomplishments\n8)    Delete Task\n9)    Quit\n-----------------------\n\nPlease select the desired action:")
         selected = input()
         if(selected == "1"):
             todayAtGlance()
@@ -204,6 +189,8 @@ def mainMenu():
         elif(selected == "5"):
             updateTask()
         elif(selected == "8"):
+            deleteTask()
+        elif(selected == "9"):
             print("See you again soon!")
             programExit = True
 
@@ -226,6 +213,37 @@ def displayTask(item,index):
     print("\n------------" + str(index) + "------------\n" + item.name + "\nDue on: " +  due + "\nStatus: " + item.status + "\n\n" + item.description + "\n-------------------------\n")
     return
 
+def deleteTask():
+    exitFunc = False
+    while(exitFunc == False): #until the user decides to leave continue
+        
+        validInput = False
+        while(validInput == False): #determine if the user needs to search for the task to find its index
+            print("\nDo you need to search for the task's index? (y/n)\n")
+            userIn = input()
+            if(userIn.lower() == "y"):
+                search() #if indicated initiate search function
+                validInput = True
+            elif(userIn.lower() != "n"):
+                print("Invalid entry, please try again.")
+            else:
+                validInput = True
+
+        validInput = False
+        while(validInput == False): #confirm the user inputed a valid integer to update
+            print("\nPlease enter the index of the task you would like to update.\n")
+            userIn = input()
+            try:
+                index = int(userIn)
+                validInput = True
+            except:
+                print("Invalid entry, please try again.")
+
+        removeFromSave(index)
+        exitFunc = True
+
+    return
+    
 def updateTask():
     
     exitFunc = False
@@ -274,6 +292,10 @@ def updateTask():
             else:
                 print("Invalid entry, please try again.")
         return
+
+#----------------------------------------------------------------------#
+
+#----------------------------At-A-Glance-------------------------------#
 
 def todayAtGlance(): #display all tasks due today
     structTime = str(time.localtime())
@@ -422,7 +444,11 @@ def weekAtGlance(): #display all tasks due today
                 i = len(structTime)
             i += 1
         oneWeek = int(yearDay) + 7
-        if(taskDay == today or (int(taskYearDay) <=  oneWeek and int(taskYearDay) >=  (oneWeek - 7) and(int(taskYear) == int(year)))):
+        year = int(year)
+        if (oneWeek > 365):
+            year += 1
+            oneWeek = oneWeek - 365
+        if(taskDay == today or (int(taskYearDay) <=  oneWeek and int(taskYearDay) >=  (oneWeek - 7) and(int(taskYear) == year))):
             displayTask(task,index)
         index += 1
         
